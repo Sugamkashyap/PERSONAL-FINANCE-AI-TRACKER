@@ -1,68 +1,140 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-
-const DashboardCard = ({ title, value, icon: Icon }) => (
-  <div className="bg-white overflow-hidden shadow rounded-lg">
-    <div className="p-5">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <Icon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-        </div>
-        <div className="ml-5 w-0 flex-1">
-          <dl>
-            <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
-            <dd className="flex items-baseline">
-              <div className="text-2xl font-semibold text-gray-900">{value}</div>
-            </dd>
-          </dl>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+import DashboardStats from '../components/DashboardStats';
+import TransactionList from '../components/TransactionList';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [user]);
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/transactions', {
+        headers: {
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch transactions');
+      const data = await response.json();
+      setTransactions(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
+
+  const recentTransactions = transactions.slice(0, 5); // Get last 5 transactions
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500">Welcome back, {user?.email}</p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <Link
+          to="/transactions"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          View All Transactions
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Placeholder cards - will be connected to real data later */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <h3 className="text-lg font-medium text-gray-900">Monthly Overview</h3>
-            <div className="mt-1 text-3xl font-semibold text-primary-600">$2,400</div>
-            <p className="mt-1 text-sm text-gray-500">Total Expenses</p>
-          </div>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+          <span className="block sm:inline">{error}</span>
         </div>
+      )}
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <h3 className="text-lg font-medium text-gray-900">Budget Status</h3>
-            <div className="mt-1 text-3xl font-semibold text-green-600">68%</div>
-            <p className="mt-1 text-sm text-gray-500">Of monthly budget used</p>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <h3 className="text-lg font-medium text-gray-900">Savings Goal</h3>
-            <div className="mt-1 text-3xl font-semibold text-blue-600">$5,000</div>
-            <p className="mt-1 text-sm text-gray-500">Target: $10,000</p>
-          </div>
-        </div>
+      <div className="mb-8">
+        <DashboardStats transactions={transactions} />
       </div>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900">Recent Transactions</h3>
-          <div className="mt-4">
-            <p className="text-gray-500 text-sm">Loading transactions...</p>
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Transactions</h2>
+          <Link
+            to="/transactions"
+            className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          >
+            View all
+          </Link>
+        </div>
+        <TransactionList
+          transactions={recentTransactions}
+          onEdit={() => {}} // We don't need edit/delete on dashboard
+          onDelete={() => {}}
+        />
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Tips</h2>
+          <ul className="space-y-3 text-gray-600">
+            <li className="flex items-start">
+              <span className="flex-shrink-0 h-5 w-5 text-green-500">✓</span>
+              <span className="ml-2">Set up monthly budgets for better financial planning</span>
+            </li>
+            <li className="flex items-start">
+              <span className="flex-shrink-0 h-5 w-5 text-green-500">✓</span>
+              <span className="ml-2">Categorize transactions for detailed insights</span>
+            </li>
+            <li className="flex items-start">
+              <span className="flex-shrink-0 h-5 w-5 text-green-500">✓</span>
+              <span className="ml-2">Review your spending patterns regularly</span>
+            </li>
+            <li className="flex items-start">
+              <span className="flex-shrink-0 h-5 w-5 text-green-500">✓</span>
+              <span className="ml-2">Set up recurring transactions for regular expenses</span>
+            </li>
+          </ul>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <Link
+              to="/transactions"
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100"
+            >
+              <span className="text-xl mb-2">💰</span>
+              <span className="text-sm font-medium text-gray-900">Add Transaction</span>
+            </Link>
+            <Link
+              to="/budget"
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100"
+            >
+              <span className="text-xl mb-2">📊</span>
+              <span className="text-sm font-medium text-gray-900">Set Budget</span>
+            </Link>
+            <Link
+              to="/profile"
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100"
+            >
+              <span className="text-xl mb-2">⚙️</span>
+              <span className="text-sm font-medium text-gray-900">Settings</span>
+            </Link>
+            <Link
+              to="/transactions?filter=recurring"
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100"
+            >
+              <span className="text-xl mb-2">🔄</span>
+              <span className="text-sm font-medium text-gray-900">Recurring</span>
+            </Link>
           </div>
         </div>
       </div>
