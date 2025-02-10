@@ -12,17 +12,36 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
     try {
-      await register(email, password);
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 6) {
+        setError('Password should be at least 6 characters');
+        return;
+      }
+
+      console.log('Attempting to register with:', email);
+      const user = await register(email, password);
+      console.log('Registration successful:', user);
       navigate('/');
     } catch (error) {
-      setError('Failed to create an account. ' + error.message);
+      console.error('Registration error:', error);
+      setError(
+        error.code === 'auth/email-already-in-use'
+          ? 'Email already in use. Please try logging in.'
+          : error.code === 'auth/invalid-email'
+          ? 'Invalid email address.'
+          : error.code === 'auth/operation-not-allowed'
+          ? 'Email/password accounts are not enabled. Please contact support.'
+          : error.code === 'auth/weak-password'
+          ? 'Password is too weak. Please use a stronger password.'
+          : error.message || 'Failed to create an account.'
+      );
     }
   };
 
@@ -36,8 +55,8 @@ const Register = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              <span className="block sm:inline">{error}</span>
             </div>
           )}
           <div className="rounded-md shadow-sm space-y-4">
