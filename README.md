@@ -166,3 +166,171 @@ Detailed API documentation is available at:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details
+
+## Backend Implementation Details
+
+### Project Structure
+
+```
+webapp/
+├── client/                 # React frontend
+│   ├── public/            # Static files
+│   └── src/
+│       ├── components/    # Reusable UI components
+│       ├── pages/        # Page components
+│       ├── context/      # React context providers
+│       ├── hooks/        # Custom React hooks
+│       └── config/       # Configuration files
+├── server/                # Node.js backend
+│   └── src/
+│       ├── models/       # MongoDB models
+│       ├── routes/       # API routes
+│       ├── middleware/   # Custom middleware
+│       └── index.js      # Server entry point
+└── ai_service/           # Python AI service
+```
+
+### Technology Stack
+
+#### Backend
+- **Node.js & Express**: Server framework
+- **MongoDB**: Database
+- **Mongoose**: MongoDB ODM
+- **Firebase Admin**: Server-side authentication
+- **Security Packages**:
+  - Helmet: Security headers
+  - CORS: Cross-origin resource sharing
+  - Morgan: HTTP request logger
+
+### Features
+
+#### Authentication
+- Email/Password authentication using Firebase
+- Protected routes
+- User profile management
+
+#### Transaction Management
+- Create, read, update, delete transactions
+- Categorize transactions
+- Add tags and notes
+- Filter and search functionality
+- Transaction statistics
+
+#### Budget Management
+- Set category-wise budgets
+- Monthly and yearly budget periods
+- Budget progress tracking
+- Notification settings for budget thresholds
+
+#### User Preferences
+- Currency settings
+- Theme preferences
+- Notification settings
+
+### API Endpoints
+
+#### Authentication
+- `GET /api/auth/profile`: Get user profile
+- `PUT /api/auth/profile`: Update user profile
+- `PUT /api/auth/budget`: Update monthly budget
+
+#### Transactions
+- `GET /api/transactions`: Get all transactions
+- `POST /api/transactions`: Create new transaction
+- `PUT /api/transactions/:id`: Update transaction
+- `DELETE /api/transactions/:id`: Delete transaction
+- `GET /api/transactions/stats`: Get transaction statistics
+
+#### Budgets
+- `GET /api/budgets`: Get all budgets
+- `POST /api/budgets`: Create new budget
+- `PUT /api/budgets/:id`: Update budget
+- `DELETE /api/budgets/:id`: Delete budget
+- `GET /api/budgets/:id/progress`: Get budget progress
+
+### Models
+
+#### User
+- Email (unique)
+- Firebase UID
+- Display Name
+- Preferences (currency, theme)
+- Monthly Budget
+- Notification Settings
+
+#### Transaction
+- User ID (reference)
+- Type (income/expense)
+- Category
+- Amount
+- Description
+- Date
+- Tags
+- Recurring settings
+- Location
+
+#### Budget
+- User ID (reference)
+- Category
+- Amount
+- Period (monthly/yearly)
+- Start/End Dates
+- Notification Settings
+- Notes
+
+### Setup Instructions
+
+#### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas)
+- Firebase project
+- Python 3.8+ (for AI service)
+
+#### Frontend Setup
+1. Navigate to client directory:
+   ```bash
+   cd client
+   npm install
+   ```
+2. Create `.env` file with Firebase config
+3. Start development server:
+   ```bash
+   npm start
+   ```
+
+#### Backend Setup
+1. Navigate to server directory:
+   ```bash
+   cd server
+   npm install
+   ```
+2. Create `.env` file with:
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   PORT=5000
+   ```
+3. Start development server:
+   ```bash
+   npm run dev
+   ```
+
+### Development Workflow
+
+1. Create feature branch
+2. Implement changes
+3. Write tests
+4. Create pull request
+5. Code review
+6. Merge to main
+
+### Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a pull request
+
+### License
+
+This project is licensed under the MIT License.
