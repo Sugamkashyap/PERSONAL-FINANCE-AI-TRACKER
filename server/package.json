@@ -9,10 +9,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "@firebase/auth": "^1.9.0",
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "firebase-admin": "^11.5.0",
+    "firebase-admin": "^11.11.1",
     "helmet": "^6.0.1",
     "mongoose": "^7.0.2",
     "morgan": "^1.10.0"
