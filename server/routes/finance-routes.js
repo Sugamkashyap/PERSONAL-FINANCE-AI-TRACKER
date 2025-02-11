@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const firebaseService = require('../services/firebase-service');
+const { getAdmin } = require('../config/firebase');
 
 // Middleware to verify Firebase ID token
 const authenticateUser = async (req, res, next) => {
@@ -10,7 +11,7 @@ const authenticateUser = async (req, res, next) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await getAdmin().auth().verifyIdToken(idToken);
     req.user = decodedToken;
     next();
   } catch (error) {

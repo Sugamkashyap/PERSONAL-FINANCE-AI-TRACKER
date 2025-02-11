@@ -1,10 +1,10 @@
-const { initializeFirebase } = require('../config/firebase');
+const { getAdmin } = require('../config/firebase');
 
 // Example function to demonstrate Firebase Admin usage
 async function firebaseExample() {
   try {
-    // Initialize Firebase Admin
-    const admin = initializeFirebase();
+    // Get Firebase Admin instance
+    const admin = getAdmin();
     
     // Example: Create a new user
     const userRecord = await admin.auth().createUser({

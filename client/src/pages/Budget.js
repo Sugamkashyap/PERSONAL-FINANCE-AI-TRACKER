@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const Budget = () => {
@@ -18,41 +18,77 @@ const Budget = () => {
     }
   });
 
-  useEffect(() => {
-    fetchBudgets();
-  }, [user]);
+  const fetchBudgets = useCallback(async () => {
+    if (!user) {
+      setError('Please login first');
+      setLoading(false);
+      return;
+    }
 
-  const fetchBudgets = async () => {
     try {
       setLoading(true);
+      const token = await user.getIdToken();
+      console.log('Fetching with token:', token); // For debugging
+
       const response = await fetch('http://localhost:5000/api/budgets', {
         headers: {
-          'Authorization': `Bearer ${await user.getIdToken()}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
-      if (!response.ok) throw new Error('Failed to fetch budgets');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch budgets');
+      }
+
       const data = await response.json();
+      console.log('Fetched budgets:', data); // For debugging
       setBudgets(data);
+      setError(null);
     } catch (err) {
+      console.error('Budget fetch error:', err);
       setError(err.message);
+      setBudgets([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBudgets();
+    }
+  }, [user, fetchBudgets]); // Add fetchBudgets to dependencies
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Validate form data
+      if (!formData.category || !formData.amount) {
+        setError('Category and amount are required');
+        return;
+      }
+
+      // Convert amount to number
+      const budgetData = {
+        ...formData,
+        amount: Number(formData.amount)
+      };
+
       const response = await fetch('http://localhost:5000/api/budgets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${await user.getIdToken()}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(budgetData)
       });
 
-      if (!response.ok) throw new Error('Failed to create budget');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create budget');
+      }
       
       await fetchBudgets();
       setShowForm(false);
@@ -68,6 +104,7 @@ const Budget = () => {
       });
     } catch (err) {
       setError(err.message);
+      console.error('Budget creation error:', err);
     }
   };
 
