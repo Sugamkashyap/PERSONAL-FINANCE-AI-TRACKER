@@ -1,11 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-<<<<<<< HEAD
 const authMiddleware = require('../middleware/auth');
-=======
-const auth = require('../middleware/auth.middleware'); // Changed from '../middleware/auth'
->>>>>>> 24e1bac868a901d4c1fdf4d939fef715c76f9c73
 
 // Get user profile
 router.get('/profile', authMiddleware, async (req, res) => {
@@ -138,7 +134,7 @@ router.post('/profile', authMiddleware, async (req, res) => {
 });
 
 // Delete user profile
-router.delete('/profile', auth, async (req, res) => {
+router.delete('/profile', authMiddleware, async (req, res) => {
   try {
     const user = await User.findOneAndDelete({ firebaseUid: req.user.uid });
     if (!user) {
