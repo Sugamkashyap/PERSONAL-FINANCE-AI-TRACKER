@@ -79,6 +79,7 @@ npm install
 # AI Service
 cd ../ai_service
 pip install -r requirements.txt
+python -m pip install --upgrade setuptools wheel
 ```
 
 3. Configure Environment Variables
@@ -212,7 +213,7 @@ Detailed API documentation is available at:
 │   ├── src/
 │   │   ├── components/    # Reusable UI components
 │   │   ├── context/      # React Context providers
-│   │   ├── hooks/        # Custom React hooks
+│   │   ├── hooks/        # Custompython -m pip install --upgrade setuptools wheel React hooks
 │   │   ├── pages/        # Page components
 │   │   └── services/     # API integration
 │

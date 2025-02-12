@@ -2,47 +2,35 @@ version: '3.8'
 
 services:
   client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
+    build: ./client
     ports:
       - "3000:3000"
     volumes:
       - ./client:/app
-      - /app/node_modules
     environment:
-      - REACT_APP_API_URL=http://server:5000
-      - REACT_APP_AI_SERVICE_URL=http://ai_service:8000
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_AI_URL=http://localhost:8000
 
   server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    build: ./server
     ports:
       - "5000:5000"
     volumes:
       - ./server:/app
-      - /app/node_modules
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/finance_tracker
-      - AI_SERVICE_URL=http://ai_service:8000
+      - MONGODB_URI=mongodb://mongo:27017/finance
+      - JWT_SECRET=your_jwt_secret
     depends_on:
-      - mongodb
+      - mongo
 
   ai_service:
-    build:
-      context: ./ai_service
-      dockerfile: Dockerfile
+    build: ./ai_service
     ports:
       - "8000:8000"
     volumes:
       - ./ai_service:/app
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017/finance_tracker
-    depends_on:
-      - mongodb
 
-  mongodb:
+  mongo:
     image: mongo:latest
     container_name: mongodb
     ports:

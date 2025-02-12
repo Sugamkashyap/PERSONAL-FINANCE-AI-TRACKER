@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+const { getAdmin } = require('../../config/firebase');
 const User = require('../models/User');
 
 const authMiddleware = async (req, res, next) => {
@@ -9,6 +9,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
+    const admin = getAdmin();
     const decodedToken = await admin.auth().verifyIdToken(token);
     
     // Find or create user in our database
@@ -22,7 +23,11 @@ const authMiddleware = async (req, res, next) => {
       });
     }
 
-    req.user = user;
+    req.user = {
+      uid: user.firebaseUid,
+      email: user.email,
+      _id: user._id
+    };
     next();
   } catch (error) {
     console.error('Auth Middleware Error:', error);

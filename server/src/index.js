@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const { initializeFirebase } = require('../config/firebase');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -12,6 +13,9 @@ const budgetRoutes = require('./routes/budget.routes');
 
 // Load environment variables
 dotenv.config();
+
+// Initialize Firebase Admin SDK
+initializeFirebase();
 
 const app = express();
 
@@ -23,12 +27,17 @@ app.use(helmet());
 
 // Database connection
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/finance_tracker', {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    retryWrites: true
   })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+  .then(() => console.log('Connected to MongoDB successfully'))
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Routes
 app.use('/api/auth', authRoutes);

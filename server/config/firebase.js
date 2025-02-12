@@ -2,27 +2,33 @@ const admin = require('firebase-admin');
 const path = require('path');
 require('dotenv').config();
 
-// Get the service account key file path from environment variables
-const serviceAccountPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
+let firebaseAdmin = null;
 
-// Initialize Firebase Admin
 const initializeFirebase = () => {
-  try {
-    // Initialize the app if it hasn't been initialized already
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountPath)
+  if (!firebaseAdmin) {
+    try {
+      const serviceAccountPath = path.resolve(
+        process.env.FIREBASE_SERVICE_ACCOUNT_PATH || 
+        path.join(__dirname, '../credentials/serviceAccountKey.json')
+      );
+      
+      const credential = admin.credential.cert(require(serviceAccountPath));
+      
+      firebaseAdmin = admin.initializeApp({
+        credential
       });
+      
       console.log('Firebase Admin SDK initialized successfully');
+      return firebaseAdmin;
+    } catch (error) {
+      console.error('Error initializing Firebase Admin SDK:', error);
+      throw error;
     }
-    return admin;
-  } catch (error) {
-    console.error('Error initializing Firebase Admin SDK:', error);
-    throw error;
   }
+  return firebaseAdmin;
 };
 
 module.exports = {
-  admin,
-  initializeFirebase
+  initializeFirebase,
+  getAdmin: () => firebaseAdmin || initializeFirebase()
 };

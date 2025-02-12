@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+<<<<<<< HEAD
 const authMiddleware = require('../middleware/auth');
+=======
+const auth = require('../middleware/auth.middleware'); // Changed from '../middleware/auth'
+>>>>>>> 24e1bac868a901d4c1fdf4d939fef715c76f9c73
 
 // Get user profile
 router.get('/profile', authMiddleware, async (req, res) => {
@@ -128,6 +132,19 @@ router.post('/profile', authMiddleware, async (req, res) => {
 
     await user.save();
     res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete user profile
+router.delete('/profile', auth, async (req, res) => {
+  try {
+    const user = await User.findOneAndDelete({ firebaseUid: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'User profile deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

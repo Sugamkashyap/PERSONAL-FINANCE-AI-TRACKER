@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
+import joblib
+import numpy as np
+from datetime import datetime
 
 app = FastAPI(
     title="Finance AI Service",
@@ -19,29 +22,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class PredictionRequest(BaseModel):
-    user_id: str
-    transaction_history: List[dict]
-    prediction_months: int = 3
+class Transaction(BaseModel):
+    amount: float
+    type: str
+    category: str
+    date: datetime
 
-class PredictionResponse(BaseModel):
-    predicted_expenses: List[float]
-    confidence_score: float
-    categories: List[str]
+class Prediction(BaseModel):
+    predicted_expenses: float
+    savings_recommendation: float
+    category_insights: dict
 
 @app.get("/")
 async def root():
     return {"message": "Finance AI Service is running"}
 
-@app.post("/predict/expenses", response_model=PredictionResponse)
-async def predict_expenses(request: PredictionRequest):
+@app.post("/predict", response_model=Prediction)
+async def predict_expenses(transactions: List[Transaction]):
     try:
-        # Placeholder for ML model prediction
-        # TODO: Implement actual ML model
-        return PredictionResponse(
-            predicted_expenses=[1000.0, 1100.0, 1200.0],
-            confidence_score=0.85,
-            categories=["Food", "Transport", "Entertainment"]
+        # Simple prediction logic (replace with actual ML model)
+        amounts = [t.amount for t in transactions]
+        avg_expense = np.mean(amounts)
+        predicted_expense = avg_expense * 1.1
+        
+        return Prediction(
+            predicted_expenses=predicted_expense,
+            savings_recommendation=avg_expense * 0.2,
+            category_insights={
+                "high_spending": ["food", "entertainment"],
+                "savings_opportunities": ["shopping", "utilities"]
+            }
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -6,10 +6,13 @@ const auth = require('../middleware/auth');
 // Get all budgets for a user
 router.get('/', auth, async (req, res) => {
   try {
-    const budgets = await Budget.find({ userId: req.user.uid });
+    console.log('User ID from token:', req.user._id); // For debugging
+    const budgets = await Budget.find({ userId: req.user._id });
+    console.log('Found budgets:', budgets); // For debugging
     res.json(budgets);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in GET /budgets:', error);
+    res.status(500).json({ message: 'Error fetching budgets', error: error.message });
   }
 });
 
@@ -17,7 +20,7 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const budget = new Budget({
-      userId: req.user.uid,
+      userId: req.user._id,
       category: req.body.category,
       amount: req.body.amount,
       period: req.body.period,
@@ -35,7 +38,7 @@ router.post('/', auth, async (req, res) => {
 // Get a specific budget
 router.get('/:id', auth, async (req, res) => {
   try {
-    const budget = await Budget.findOne({ _id: req.params.id, userId: req.user.uid });
+    const budget = await Budget.findOne({ _id: req.params.id, userId: req.user._id });
     if (!budget) {
       return res.status(404).json({ message: 'Budget not found' });
     }
@@ -48,7 +51,7 @@ router.get('/:id', auth, async (req, res) => {
 // Update a budget
 router.put('/:id', auth, async (req, res) => {
   try {
-    const budget = await Budget.findOne({ _id: req.params.id, userId: req.user.uid });
+    const budget = await Budget.findOne({ _id: req.params.id, userId: req.user._id });
     if (!budget) {
       return res.status(404).json({ message: 'Budget not found' });
     }
@@ -76,7 +79,7 @@ router.put('/:id', auth, async (req, res) => {
 // Delete a budget
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const budget = await Budget.findOne({ _id: req.params.id, userId: req.user.uid });
+    const budget = await Budget.findOne({ _id: req.params.id, userId: req.user._id });
     if (!budget) {
       return res.status(404).json({ message: 'Budget not found' });
     }
@@ -91,7 +94,7 @@ router.delete('/:id', auth, async (req, res) => {
 // Get budget statistics
 router.get('/stats/overview', auth, async (req, res) => {
   try {
-    const budgets = await Budget.find({ userId: req.user.uid });
+    const budgets = await Budget.find({ userId: req.user._id });
     
     const stats = {
       totalBudget: 0,
