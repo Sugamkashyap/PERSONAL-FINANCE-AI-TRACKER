@@ -1,0 +1,18 @@
+{
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  },
+  "dependencies": {
+    "mongoose": "^6.12.0",
+    "mongodb": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest",
+    "format": "prettier --write ."
+  }
+}

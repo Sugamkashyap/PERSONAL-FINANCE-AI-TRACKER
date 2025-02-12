@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth');
 
 // Get user profile
-router.get('/profile', auth, async (req, res) => {
+router.get('/profile', authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ firebaseUid: req.user.uid });
     if (!user) {
@@ -17,7 +17,7 @@ router.get('/profile', auth, async (req, res) => {
 });
 
 // Update user profile
-router.put('/profile', auth, async (req, res) => {
+router.put('/profile', authMiddleware, async (req, res) => {
   try {
     const { displayName, preferences } = req.body;
     const user = await User.findOne({ firebaseUid: req.user.uid });
@@ -75,7 +75,7 @@ router.put('/profile', auth, async (req, res) => {
 });
 
 // Remove category
-router.delete('/profile/categories/:type/:category', auth, async (req, res) => {
+router.delete('/profile/categories/:type/:category', authMiddleware, async (req, res) => {
   try {
     const { type, category } = req.params;
     const user = await User.findOne({ firebaseUid: req.user.uid });
@@ -100,7 +100,7 @@ router.delete('/profile/categories/:type/:category', auth, async (req, res) => {
 });
 
 // Create new user profile
-router.post('/profile', auth, async (req, res) => {
+router.post('/profile', authMiddleware, async (req, res) => {
   try {
     // Check if user already exists
     let user = await User.findOne({ firebaseUid: req.user.uid });

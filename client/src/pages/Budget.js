@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const Budget = () => {
@@ -18,11 +18,7 @@ const Budget = () => {
     }
   });
 
-  useEffect(() => {
-    fetchBudgets();
-  }, [user]);
-
-  const fetchBudgets = async () => {
+  const fetchBudgets = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:5000/api/budgets', {
@@ -38,7 +34,13 @@ const Budget = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBudgets();
+    }
+  }, [fetchBudgets, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

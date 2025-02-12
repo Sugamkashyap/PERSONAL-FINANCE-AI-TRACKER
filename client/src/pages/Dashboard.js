@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import DashboardStats from '../components/DashboardStats';
@@ -10,13 +10,15 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [user]);
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      if (!user) {
+        throw new Error('Please sign in to view dashboard');
+      }
+
       const response = await fetch('http://localhost:5000/api/transactions', {
         headers: {
           'Authorization': `Bearer ${await user.getIdToken()}`
@@ -26,11 +28,18 @@ const Dashboard = () => {
       const data = await response.json();
       setTransactions(data);
     } catch (err) {
-      setError(err.message);
+      console.error('Error fetching transactions:', err);
+      setError(err.message || 'Failed to load transactions');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchTransactions();
+    }
+  }, [fetchTransactions, user]);
 
   if (loading) {
     return (

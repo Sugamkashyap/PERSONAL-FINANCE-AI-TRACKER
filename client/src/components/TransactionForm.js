@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const TransactionForm = ({ onSubmit, initialData = null }) => {
@@ -17,11 +17,7 @@ const TransactionForm = ({ onSubmit, initialData = null }) => {
     income: []
   });
 
-  useEffect(() => {
-    fetchCategories();
-  }, [user]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:5000/api/auth/profile', {
         headers: {
@@ -37,7 +33,11 @@ const TransactionForm = ({ onSubmit, initialData = null }) => {
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

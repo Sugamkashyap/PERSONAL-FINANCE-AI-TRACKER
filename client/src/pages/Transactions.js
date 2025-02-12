@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import { useAuth } from '../hooks/useAuth';
@@ -11,11 +11,7 @@ const Transactions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [user]);
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:5000/api/transactions', {
@@ -31,7 +27,13 @@ const Transactions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]); // Add user as dependency since it's used in the function
+
+  useEffect(() => {
+    if (user) {
+      fetchTransactions();
+    }
+  }, [fetchTransactions, user]); // Add fetchTransactions and user as dependencies
 
   const handleSubmit = async (formData) => {
     try {
